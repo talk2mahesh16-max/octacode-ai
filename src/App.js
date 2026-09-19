@@ -7,7 +7,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [language, setLanguage] = useState('JavaScript');
-  
+  const [activeTab, setActiveTab] = useState('code'); // 'code' ya 'preview'
+
   // LocalStorage se history load karein
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem('octacode_history');
@@ -72,6 +73,13 @@ function App() {
         let cleanText = data.candidates[0].content.parts[0].text;
         cleanText = cleanText.replace(/```[a-zA-Z]*\n?/g, '').replace(/```/g, '').trim();
         setResponse(cleanText);
+
+        // HTML/CSS generate hote hi automatically preview tab par switch karein
+        if (language === 'HTML/CSS') {
+          setActiveTab('preview');
+        } else {
+          setActiveTab('code');
+        }
 
         const newEntry = {
           id: Date.now(),
@@ -164,6 +172,7 @@ function App() {
                     setResponse(item.code);
                     setLanguage(item.lang);
                     setInputPrompt(item.prompt);
+                    if (item.lang === 'HTML/CSS') setActiveTab('preview');
                   }}
                   style={{
                     backgroundColor: '#131e3a',
@@ -195,7 +204,7 @@ function App() {
         </aside>
 
         {/* Center Prompt & Controls Area */}
-        <section style={{ width: '420px', padding: '24px', borderRight: '1px solid #1e293b', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <section style={{ width: '400px', padding: '24px', borderRight: '1px solid #1e293b', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: '600', display: 'block', marginBottom: '8px' }}>Target Environment</label>
             <select
@@ -294,10 +303,41 @@ function App() {
         <main style={{ flex: 1, backgroundColor: '#070b14', display: 'flex', flexDirection: 'column' }}>
           
           {/* Canvas Action Bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', backgroundColor: '#0f172a', borderBottom: '1px solid #1e293b' }}>
-            <span style={{ fontSize: '0.85rem', color: '#38bdf8', fontFamily: 'monospace', fontWeight: '600' }}>
-              SOURCE CANVAS: {language.toUpperCase()}
-            </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', backgroundColor: '#0f172a', borderBottom: '1px solid #1e293b' }}>
+            
+            {/* View Tabs: Code vs Live Preview */}
+            <div style={{ display: 'flex', gap: '6px', backgroundColor: '#1e293b', padding: '3px', borderRadius: '6px' }}>
+              <button
+                onClick={() => setActiveTab('code')}
+                style={{
+                  backgroundColor: activeTab === 'code' ? '#0284c7' : 'transparent',
+                  color: activeTab === 'code' ? '#fff' : '#94a3b8',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '4px 12px',
+                  fontSize: '0.78rem',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Code
+              </button>
+              <button
+                onClick={() => setActiveTab('preview')}
+                style={{
+                  backgroundColor: activeTab === 'preview' ? '#0284c7' : 'transparent',
+                  color: activeTab === 'preview' ? '#fff' : '#94a3b8',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '4px 12px',
+                  fontSize: '0.78rem',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Live Preview
+              </button>
+            </div>
             
             <div style={{ display: 'flex', gap: '8px' }}>
               {response && (
@@ -331,12 +371,28 @@ function App() {
             </div>
           </div>
 
-          {/* Editor Area */}
-          <div style={{ flex: 1, padding: '20px', overflow: 'auto' }}>
+          {/* Canvas View Area */}
+          <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
             {response ? (
-              <pre style={{ margin: 0, color: '#e2e8f0', fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.92rem', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
-                <code>{response}</code>
-              </pre>
+              activeTab === 'code' ? (
+                <div style={{ height: '100%', padding: '20px', overflow: 'auto', boxSizing: 'border-box' }}>
+                  <pre style={{ margin: 0, color: '#e2e8f0', fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.92rem', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+                    <code>{response}</code>
+                  </pre>
+                </div>
+              ) : (
+                <iframe
+                  title="OctaCode Live Preview"
+                  srcDoc={response}
+                  sandbox="allow-scripts allow-modals"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    backgroundColor: '#ffffff'
+                  }}
+                />
+              )
             ) : (
               <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '0.95rem' }}>
                 Select a template or describe your component to generate code canvas.
