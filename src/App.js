@@ -383,13 +383,28 @@ function App() {
               ) : (
                 <iframe
                   title="OctaCode Live Preview"
-                  srcDoc={response}
+                  srcDoc={`
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <script src="https://cdn.tailwindcss.com"></script>
+                        <style>
+                          body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background-color: #0f172a; color: #f8fafc; min-height: 100vh; }
+                        </style>
+                      </head>
+                      <body>
+                        ${response}
+                      </body>
+                    </html>
+                  `}
                   sandbox="allow-scripts allow-modals"
                   style={{
                     width: '100%',
                     height: '100%',
                     border: 'none',
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#0f172a'
                   }}
                 />
               )
