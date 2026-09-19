@@ -7,15 +7,13 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [language, setLanguage] = useState('JavaScript');
-  const [activeTab, setActiveTab] = useState('code'); // 'code' ya 'preview'
+  const [activeTab, setActiveTab] = useState('code');
 
-  // LocalStorage se history load karein
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem('octacode_history');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // History update hote hi LocalStorage me save karein
   useEffect(() => {
     localStorage.setItem('octacode_history', JSON.stringify(history));
   }, [history]);
@@ -53,7 +51,7 @@ function App() {
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -74,7 +72,6 @@ function App() {
         cleanText = cleanText.replace(/```[a-zA-Z]*\n?/g, '').replace(/```/g, '').trim();
         setResponse(cleanText);
 
-        // HTML/CSS generate hote hi automatically preview tab par switch karein
         if (language === 'HTML/CSS') {
           setActiveTab('preview');
         } else {
@@ -140,7 +137,7 @@ function App() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#10b981' }}>
           <span style={{ height: '8px', width: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
-          Engine: Gemini 3.6 Flash Live
+          Engine: Gemini 1.5 Flash Live
         </div>
       </header>
 
@@ -203,7 +200,7 @@ function App() {
           </div>
         </aside>
 
-        {/* Center Prompt & Controls Area */}
+        {/* Center Controls */}
         <section style={{ width: '400px', padding: '24px', borderRight: '1px solid #1e293b', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: '600', display: 'block', marginBottom: '8px' }}>Target Environment</label>
@@ -270,7 +267,6 @@ function App() {
             </button>
           </div>
 
-          {/* Preset Prompts */}
           <div>
             <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Quick Starter Presets</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
@@ -299,13 +295,9 @@ function App() {
           </div>
         </section>
 
-        {/* Right Code Canvas */}
+        {/* Right Code & Live Preview Canvas */}
         <main style={{ flex: 1, backgroundColor: '#070b14', display: 'flex', flexDirection: 'column' }}>
-          
-          {/* Canvas Action Bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', backgroundColor: '#0f172a', borderBottom: '1px solid #1e293b' }}>
-            
-            {/* View Tabs: Code vs Live Preview */}
             <div style={{ display: 'flex', gap: '6px', backgroundColor: '#1e293b', padding: '3px', borderRadius: '6px' }}>
               <button
                 onClick={() => setActiveTab('code')}
@@ -371,7 +363,6 @@ function App() {
             </div>
           </div>
 
-          {/* Canvas View Area */}
           <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
             {response ? (
               activeTab === 'code' ? (
@@ -414,7 +405,6 @@ function App() {
               </div>
             )}
           </div>
-
         </main>
 
       </div>
