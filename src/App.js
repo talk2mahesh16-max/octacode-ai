@@ -49,53 +49,68 @@ function App() {
       ? `${customInstruction} on this code requirement: ${query}`
       : `Write clean, complete, production-ready code in ${language} for: ${query}. Return only clean code with concise comments.`;
 
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: `You are OctaCode AI Studio, an elite engineering assistant. ${finalInstruction}`
+    let attempts = 0;
+    const maxAttempts = 3;
+    let success = false;
+
+    while (attempts < maxAttempts && !success) {
+      try {
+        attempts++;
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: `You are OctaCode AI Studio, an elite engineering assistant. ${finalInstruction}`
+                }]
               }]
-            }]
-          })
+            })
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
+          let cleanText = data.candidates[0].content.parts[0].text;
+          cleanText = cleanText.replace(/```[a-zA-Z]*\n?/g, '').replace(/```/g, '').trim();
+          setResponse(cleanText);
+
+          if (language === 'HTML/CSS') {
+            setActiveTab('preview');
+          } else {
+            setActiveTab('code');
+          }
+
+          const newEntry = {
+            id: Date.now(),
+            prompt: query,
+            lang: language,
+            code: cleanText,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setHistory((prev) => [newEntry, ...prev.filter(item => item.prompt !== query)]);
+          success = true;
+        } else if (data.error) {
+          if (attempts < maxAttempts) {
+            // High demand hone par 1.5 second ruk kar auto-retry karega
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+          } else {
+            setResponse("// API Error: " + data.error.message);
+          }
         }
-      );
-
-      const data = await res.json();
-
-      if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
-        let cleanText = data.candidates[0].content.parts[0].text;
-        cleanText = cleanText.replace(/```[a-zA-Z]*\n?/g, '').replace(/```/g, '').trim();
-        setResponse(cleanText);
-
-        if (language === 'HTML/CSS') {
-          setActiveTab('preview');
+      } catch (err) {
+        if (attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
         } else {
-          setActiveTab('code');
+          setResponse("// Network Error: " + err.message);
         }
-
-        const newEntry = {
-          id: Date.now(),
-          prompt: query,
-          lang: language,
-          code: cleanText,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        setHistory((prev) => [newEntry, ...prev.filter(item => item.prompt !== query)]);
-      } else if (data.error) {
-        setResponse("// API Error: " + data.error.message);
-      } else {
-        setResponse("// Error: Could not generate code. Please try again.");
       }
-    } catch (err) {
-      setResponse("// Network Error: " + err.message);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   const handleCopy = () => {
@@ -137,7 +152,7 @@ function App() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#10b981' }}>
           <span style={{ height: '8px', width: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
-          Engine: Gemini 2.0 Flash Live
+          Engine: Gemini 3.6 Flash Live
         </div>
       </header>
 
@@ -179,7 +194,7 @@ function App() {
                     border: '1px solid #1e293b'
                   }}
                 >
-                  <div style={{ display: 'flex', borderBottom: 'none', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#38bdf8', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#38bdf8', marginBottom: '4px' }}>
                     <span>{item.lang}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span style={{ color: '#64748b' }}>{item.time}</span>
