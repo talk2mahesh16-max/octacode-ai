@@ -51,7 +51,7 @@ function App() {
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -137,7 +137,7 @@ function App() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#10b981' }}>
           <span style={{ height: '8px', width: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
-          Engine: Gemini 2.5 Flash Live
+          Engine: Gemini 2.0 Flash Live
         </div>
       </header>
 
@@ -179,7 +179,7 @@ function App() {
                     border: '1px solid #1e293b'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#38bdf8', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', borderBottom: 'none', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#38bdf8', marginBottom: '4px' }}>
                     <span>{item.lang}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span style={{ color: '#64748b' }}>{item.time}</span>
@@ -200,7 +200,7 @@ function App() {
           </div>
         </aside>
 
-        {/* Center Prompt & Controls */}
+        {/* Center Controls */}
         <section style={{ width: '400px', padding: '24px', borderRight: '1px solid #1e293b', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: '600', display: 'block', marginBottom: '8px' }}>Target Environment</label>
@@ -295,7 +295,7 @@ function App() {
           </div>
         </section>
 
-        {/* Right Code Canvas */}
+        {/* Right Code & Live Preview Canvas */}
         <main style={{ flex: 1, backgroundColor: '#070b14', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', backgroundColor: '#0f172a', borderBottom: '1px solid #1e293b' }}>
             <div style={{ display: 'flex', gap: '6px', backgroundColor: '#1e293b', padding: '3px', borderRadius: '6px' }}>
